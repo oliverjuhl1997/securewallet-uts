@@ -1,6 +1,5 @@
 
 
-
 /*
 -----------------------------------------------------------
 WORKING DRAFT FOR THE FUNCTIONS PROTOTYPES OF SECURE WALLET
