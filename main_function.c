@@ -2,14 +2,17 @@
  The main function of the program
 
 *******************************************************************************/
-#include <stdio.h> 
 #include "headerFiles.h"
-#include "gabriel-functions.c"
+#include <stdio.h> 
 
 int main(void) {
-	printf("Test");
-	print_auth_menu();
+	int inp;
 
+	print_auth_menu();
+	while (!(inp == 1 || inp == 2)) {
+		printf("Get input: \n");
+		scanf("%d", &inp);
+	}
 
 	return 0;
 }
