@@ -1,11 +1,16 @@
 #makefile for producing main.out
 
-main.out : main_function.o gabriel-functions.o
-	gcc -Wall -ansi -lm -o main.out main_function.o gabriel-functions.o
+CC = gcc
+CFLAGS = -Wall -ansi -lm
+
+main.out : main_function.o authentication.o
+	$(CC) $(CFLAGS) -o main.out main_function.o authentication.o
 
 main_function.o : main_function.c headerFiles.h
-		gcc -Wall -ansi -lm -c -o main_function.o main_function.c
+	$(CC) $(CFLAGS) -c -o main_function.o main_function.c
 
-gabriel-functions.o : headerFiles.h
-		gcc -Wall -ansi -lm -c -o gabriel-functions.o gabriel-functions.c
-		
+authentication.o : authentication.c headerFiles.h
+	$(CC) $(CFLAGS) -c -o authentication.o authentication.c
+
+clean:
+	rm main.out main_function.o authentication.o

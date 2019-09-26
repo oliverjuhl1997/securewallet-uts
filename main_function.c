@@ -3,13 +3,24 @@
 
 *******************************************************************************/
 #include <stdio.h> 
+#include <stdlib.h>
+#include <string.h>
 #include "headerFiles.h"
-#include "gabriel-functions.c"
 
 int main(void) {
-	printf("Test");
-	print_auth_menu();
+	int choice;
+	user_t *user = NULL;
 
+	while(user == NULL)
+	{
+		print_auth_menu();	
+		scanf("%d", &choice);	
+		auth_choice(choice);
+	}
 
+	while (!(user == NULL))
+	{
+		printf("Options\n");
+	}
 	return 0;
 }
