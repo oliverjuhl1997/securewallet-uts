@@ -69,7 +69,6 @@ void register_user(void)
   {
     printf("Unable to open file at path: %s", DB_NAME);
   }
-  
   fprintf(file, "%s %s", user.username, user.pwd); 
   fclose(file);
 
@@ -88,13 +87,13 @@ int find_user(char username[], char pwd[])
 {
   int valid = 0;
   FILE *file = NULL;
+
   file = fopen(DB_NAME, "r");
   if (file == NULL)
   {
     printf("Unable to open file at path: %s", DB_NAME);
     return 0;
   }
-
   char temp[512];
 
   while (fgets(temp, 512, file) != NULL)
