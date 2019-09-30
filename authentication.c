@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "headerFiles.h"
+#include "header_files.h"
 
 /*******************************************************************************
  * Author: Alistair Coomber
@@ -15,23 +15,24 @@
 *******************************************************************************/
 void auth_choice(int choice)
 {
-  switch(choice){
-    case 1:
+  switch (choice)
+  {
+  case 1:
     login();
 
     break;
-    
-    case 2:
+
+  case 2:
     register_user();
     break;
 
-    case 3:
+  case 3:
     exit(0);
 
-    default:
+  default:
     printf("Invalid option!\n");
   }
-} 
+}
 
 /*******************************************************************************
  * Author: Oliver Windall Juhl
@@ -42,24 +43,20 @@ void auth_choice(int choice)
  * - char username[]: a string containing the username for the user
  * - char password[]: a string containing the password for the user
 
- Issues: If registering multiple users, the subroutine overwrites the line 
+ Issues: If registering multiple users, the subroutine overwrites the line
  rather than adding the username and password to a new line
 *******************************************************************************/
 void register_user(void)
 {
   user_t user;
   file_t *head = NULL;
-  
+
   printf("Enter usename: ");
   scanf("%s", user.username);
   printf("Enter password: ");
   scanf("%s", user.pwd);
 
-  printf("%s", user.pwd);
-
-  /* VALIDATE PASSWORD AND USERNAME*/
   printf("%d\n", valid_password(user.pwd));
-
 
   user.files = head;
 
@@ -69,11 +66,10 @@ void register_user(void)
   {
     printf("Unable to open file at path: %s", DB_NAME);
   }
-  fprintf(file, "%s %s", user.username, user.pwd); 
+  fprintf(file, "%s %s", user.username, user.pwd);
   fclose(file);
 
   printf("successfully registered user\n\n");
-  
 }
 
 /*******************************************************************************
@@ -85,7 +81,6 @@ void register_user(void)
 *******************************************************************************/
 int find_user(char username[], char pwd[])
 {
-  int valid = 0;
   FILE *file = NULL;
 
   file = fopen(DB_NAME, "r");
@@ -96,10 +91,11 @@ int find_user(char username[], char pwd[])
   }
   char temp[512];
 
-  while (fgets(temp, 512, file) != NULL)
+  while (fgets(temp, 512, file))
   {
     char temp_username[MAX_USERNAME_LEN + 1];
     char temp_pwd[MAX_PWD_LEN + 1];
+
     char *details_ptr = strtok(temp, " ");
     int counter = 0;
     do
@@ -119,27 +115,23 @@ int find_user(char username[], char pwd[])
 
     if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
     {
-      /*
-      char* user_info = details_ptr; */
       printf("Found -> username: %s, password: %s", temp_username, temp_pwd);
       printf("Loading user...\n");
-      valid = 1;
-      return valid;
-    } 
+      return 1;
+    }
     else
     {
       printf("User not found\n");
-      return valid;
     }
   }
   fclose(file);
-  return valid;
+  return 0;
 }
 
 /*******************************************************************************
  * Author: Matty B
  * This function checks whether the password is valid and returns a boolean flag
- * inputs: 
+ * inputs:
  * - char password[]: A string containing the password
  * outputs:
  * - int valid: A boolean variable storing the validity of the password
@@ -148,30 +140,32 @@ int valid_password(char password[])
 {
   int valid = 0;
 
-    /* CHECKING THE SIZE OF PASSWORD */
-    if ((strlen(password) < 6) || (strlen(password) > 16)) {
-      return valid;
-    } 
-    /* LOOP THROUGH THE PASSWORD */
+  /* CHECKING THE SIZE OF PASSWORD */
+  if ((strlen(password) < 6) || (strlen(password) > 16))
+  {
+    return valid;
+  }
+  /* LOOP THROUGH THE PASSWORD */
   int i;
-  for (i=0; i<strlen(password); i++) {
+  for (i = 0; i < strlen(password); i++)
+  {
 
     /* CHECKING FOR ANY SPECIAL CHARACTERS */
-      if(('a' <= password[i] && password[i] <= 'z') && ('A' <=  password[i] && password[i] <= 'Z') && ('0' <=  password[i] && password[i] <= '9'))
-      {
-        valid = 1;
-        return valid;
-      }
-      else
-      {
-        return valid; 
-      }
+    if (('a' <= password[i] && password[i] <= 'z') && ('A' <= password[i] && password[i] <= 'Z') && ('0' <= password[i] && password[i] <= '9'))
+    {
+      valid = 1;
+      return valid;
+    }
+    else
+    {
+      return valid;
+    }
   }
   return valid;
 }
 
 /*******************************************************************************
- * Author: Gabriel 
+ * Author: Gabriel
  * This function prints the initial menu for the user
  * inputs: none
  * outputs: none
@@ -185,30 +179,31 @@ void print_auth_menu(void)
 }
 
 /*******************************************************************************
- * Author: Gabriel 
- * This function handles the login authentication by obtaining all the login 
+ * Author: Gabriel
+ * This function handles the login authentication by obtaining all the login
  * information and running the appropiate tasks
  * inputs: none
  * outputs: none
 *******************************************************************************/
-void login(void) 
+void login(void)
 {
   int valid = 0;
   char username[MAX_USERNAME_LEN + 1];
   char pwd[MAX_PWD_LEN + 1];
 
   printf("Enter login details! (or press 'b' to go back) \n");
-  do {
+  do
+  {
     print_login();
     printf("Enter username: ");
     scanf("%s", username);
-    if (strcmp(username, "b") == 0) 
+    if (strcmp(username, "b") == 0)
     {
       main();
     }
     printf("Enter password: ");
     scanf("%s", pwd);
-    if (strcmp(pwd, "b") == 0) 
+    if (strcmp(pwd, "b") == 0)
     {
       main();
     }
@@ -219,14 +214,13 @@ void login(void)
 }
 
 /*******************************************************************************
- * Author: Gabriel 
+ * Author: Gabriel
  * This function prints the login user interface for the user
  * inputs: none
  * outputs: none
 *******************************************************************************/
-void print_login(void) 
+void print_login(void)
 {
   printf("Enter username and password followed by a space\n");
   printf("Or enter 'b' to go back\n");
 }
-

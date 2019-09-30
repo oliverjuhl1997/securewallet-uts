@@ -6,10 +6,10 @@ CFLAGS = -Wall -ansi -lm
 main.out : main_function.o authentication.o
 	$(CC) $(CFLAGS) -o main.out main_function.o authentication.o
 
-main_function.o : main_function.c headerFiles.h
+main_function.o : main_function.c header_files.h
 	$(CC) $(CFLAGS) -c -o main_function.o main_function.c
 
-authentication.o : authentication.c headerFiles.h
+authentication.o : authentication.c header_files.h
 	$(CC) $(CFLAGS) -c -o authentication.o authentication.c
 
 clean:

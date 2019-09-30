@@ -2,10 +2,10 @@
  The main function of the program
 
 *******************************************************************************/
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "headerFiles.h"
+#include "header_files.h"
 
 int main(void) {
 	int choice;
@@ -13,8 +13,8 @@ int main(void) {
 
 	while(user == NULL)
 	{
-		print_auth_menu();	
-		scanf("%d", &choice);	
+		print_auth_menu();
+		scanf("%d", &choice);
 		auth_choice(choice);
 	}
 

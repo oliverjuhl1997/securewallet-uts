@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "headerFiles.h"
+#include "header_files.h"
 
 #define ENCRYPTION_KEY 0xFACA
 #define ENCRYPTION_KEY_LEN 6

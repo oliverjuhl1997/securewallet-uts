@@ -12,8 +12,8 @@ WORKING DRAFT FOR THE FUNCTIONS PROTOTYPES OF SECURE WALLET
  * Flag to the next menu
  * We support two options: register and login
  * inputs: none
- * outputs: 
- * - int user_id. Returns the user_id. user_id by default is set to -1 if 
+ * outputs:
+ * - int user_id. Returns the user_id. user_id by default is set to -1 if
  * if the password validation didn't work.
 *******************************************************************************/
 void print_auth_menu();
@@ -25,13 +25,13 @@ void print_auth_menu();
  * - int choice: The number used in the switch statement
  * outputs: none
  * - int user_id: an integer value containing the user_id (index) of the user
- * struct that has logged in. 
+ * struct that has logged in.
 *******************************************************************************/
 int auth_choice(int choice); /* User can either register or login - Allistair*/
 
 /*******************************************************************************
  * This function handles all the tasks with registering the user. The function
- * will prompt the user for the information and register the user. 
+ * will prompt the user for the information and register the user.
  * We wil store: email, username, password, date created (ADD TO THIS)
  * inputs: none
  * outputs: none
@@ -39,10 +39,10 @@ int auth_choice(int choice); /* User can either register or login - Allistair*/
 void register_user(void); /* Gabriel */
 
 /*******************************************************************************
- * This function adds the registered user information into a new structure 
- * of type user by firstly dynamically allocating memory and then storing the 
+ * This function adds the registered user information into a new structure
+ * of type user by firstly dynamically allocating memory and then storing the
  * users information
- * inputs: 
+ * inputs:
  * - user_t *user: a pointer variable for the userId
  * - char username[]: a string containing the username for the user
  * - char password[]: a string containing the password for the user
@@ -66,16 +66,16 @@ int valid_password(char password[]); /* Checks password validity. Returns 1 if v
  * file.
  * inputs:
  * - user_t *user: a variable pointing to the memory address of the user structure
- * outputs: none 
+ * outputs: none
 *******************************************************************************/
-void save_users(user_t *user); /* Oliver */
+void save_user(user_t *user); /* Oliver */
 
 /*******************************************************************************
  * This function signs a user in, it deals with all the login functionality.
  * inputs: none
- * outputs: 
- * - int user_id: returns the index of the structure that contains the user 
- * that just logged in. 
+ * outputs:
+ * - int user_id: returns the index of the structure that contains the user
+ * that just logged in.
 *******************************************************************************/
 int getLogin(void);
 
@@ -89,7 +89,7 @@ void printLoginUI(void);
 /*******************************************************************************
  * This function gets the username and password input from the user and stores
  * it in a pointer variable
- * inputs: 
+ * inputs:
  * - char *username[]: a variable pointing to the memory address of username
  * - char *pwd[]: a variable pointing to the memory address of pwd
  * outputs: none
@@ -97,10 +97,10 @@ void printLoginUI(void);
 void getLoginInfo(char *username[], char *pwd[]); /* MATT */
 
 /*******************************************************************************
- * This function loads the user details from an external text file database and 
+ * This function loads the user details from an external text file database and
  * saves them into an array of user structures
  * inputs:
- * - user_t *users[]: variable pointing to the address of list of users 
+ * - user_t *users[]: variable pointing to the address of list of users
  * outputs: none
 *******************************************************************************/
 void loadUsers(user_t *users[]); /* Oliver */
@@ -108,7 +108,7 @@ void loadUsers(user_t *users[]); /* Oliver */
 /*******************************************************************************
  * This function checks the inputted username and password against the ones stored
  * in the database file. Returning a boolean value if the match was successful
- * inputs: 
+ * inputs:
  * - user_t *users[]: variable pointing to an array of structures
  * outputs:
  * int flag: a flag boolean variable
