@@ -33,10 +33,16 @@ struct user
 typedef struct user user_t;
 
 int main(void);
+/* Print related functions */
 void print_auth_menu(void);
-int valid_password(char password[]);
+void print_login(void);
+/* Authentication related functions */
 int find_user(char username[], char pwd[]);
-void auth_choice(int choice); /* Dont forget to add user_t *user */
+int valid_password(char password[]);
 void register_user(void);
 void login(void);
-void print_login(void);
+void auth_choice(int choice); /* Dont forget to add user_t *user */
+/* Encryption related functions */
+void simple_encrypt(char pwd[]);
+void simple_decrypt(char pwd[]);
+void xor_encryption(char pwd[]);
