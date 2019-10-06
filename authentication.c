@@ -13,22 +13,18 @@
  * - int user_id: an integer value containing the user_id (index) of the user
  * struct that has logged in.  User can either register or login - Allistair
 *******************************************************************************/
-void auth_choice(int choice)
+void auth_choice(int choice, file_t* files)
 {
   switch (choice)
   {
   case 1:
-    login();
-
+    login(files);
     break;
-
   case 2:
     register_user();
     break;
-
   case 3:
     exit(0);
-
   default:
     printf("Invalid option!\n");
   }
@@ -75,57 +71,119 @@ void register_user(void)
 /*******************************************************************************
  * Author: Oliver Windall Juhl
  * This function loads the user details from an external text file database and
- * saves them into an array of user structures
- * inputs: none
- * outputs: none
+ * saves them into an array of user structures.
+ * Furthermore, it loads the files with filename and size into a linked list.
+ * inputs:
+ * - char username[]: Username entered through the terminal
+ * - char pwd[]: Password entered through the terminal
+ * - char *files: Pointer to the head of the linked list of files to fill out
+ * outputs:
+ * - int: 1 if user exists and matches the input else 0
 *******************************************************************************/
-int find_user(char username[], char pwd[])
+int find_user(char username[], char pwd[], file_t *files)
 {
   FILE *file = NULL;
-
   file = fopen(DB_NAME, "r");
   if (file == NULL)
   {
     printf("Unable to open file at path: %s", DB_NAME);
     return 0;
   }
-  char temp[512];
+  char line_in_file[512];
 
-  while (fgets(temp, 512, file))
+  while (fgets(line_in_file, 512, file))
   {
     char temp_username[MAX_USERNAME_LEN + 1];
     char temp_pwd[MAX_PWD_LEN + 1];
+    int num_of_files = 0;
 
-    char *details_ptr = strtok(temp, " ");
-    int counter = 0;
+    char *part_of_line = strtok(line_in_file, " ");
+    int counter = 1;
+    char temp_filename[MAX_FILENAME_LEN + 1];
+    int temp_filesize = 0;
     do
     {
-      printf("%s \n", details_ptr);
-      if (counter == 0)
-      {
-        strcpy(temp_username, details_ptr);
-      }
       if (counter == 1)
       {
-        strcpy(temp_pwd, details_ptr);
+        strcpy(temp_username, part_of_line);
       }
-      details_ptr = strtok(NULL, " ");
+      else if (counter == 2)
+      {
+        strcpy(temp_pwd, part_of_line);
+      }
+      else if (counter == 3)
+      {
+        num_of_files = (int)part_of_line;
+      }
+      else
+      {
+        if (counter % 2 == 0)
+        {
+          strcpy(temp_filename, part_of_line);
+        }
+        else
+        {
+          sscanf(part_of_line, "%d", &temp_filesize);
+          files = add_file(files, temp_filename, temp_filesize);
+        }
+      }
+
+      part_of_line = strtok(NULL, " ");
       counter++;
-    } while ((details_ptr != NULL) && counter < 2);
+    } while ((part_of_line != NULL));
 
     if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
     {
-      printf("Found -> username: %s, password: %s", temp_username, temp_pwd);
-      printf("Loading user...\n");
+      printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd);
+      fclose(file);
       return 1;
     }
     else
     {
+      files = NULL;
       printf("User not found\n");
     }
   }
-  fclose(file);
   return 0;
+}
+
+/*******************************************************************************
+ * Author: Oliver Windall Juhl
+ * This function adds a file struct to the linked list of files. Currently, we
+ * save only filename and size withing the elements of the linked list.
+ * inputs:
+ * - file_t *head: Pointer to the current first element of the list
+ * - char filename[]: Name of the file to add
+ * - int filesize: Size of the file to add
+ * outputs:
+ * - file_t: The new head of the linked list
+*******************************************************************************/
+file_t *add_file(file_t *head, char filename[], int filesize)
+{
+  file_t *new_file = malloc(sizeof(file_t));
+  strcpy(new_file->filename, filename);
+  new_file->size = filesize;
+  new_file->next = head;
+  head = new_file;
+  return head;
+}
+
+/*******************************************************************************
+ * Author: Oliver Windall Juhl
+ * Basic helper function to print the elements of the linked list.
+ * (DEBUGGING PURPOSES)
+ * inputs:
+ * - file_t *head: Pointer to the current first element of the list
+ * outputs: none
+*******************************************************************************/
+void print_files(file_t *head)
+{
+  file_t *current = head;
+  while (current != NULL)
+  {
+    printf("User has file %s with size %i", current->filename, current->size);
+    current = current->next;
+  }
 }
 
 /*******************************************************************************
@@ -185,7 +243,7 @@ void print_auth_menu(void)
  * inputs: none
  * outputs: none
 *******************************************************************************/
-void login(void)
+void login(file_t *files)
 {
   int valid = 0;
   char username[MAX_USERNAME_LEN + 1];
@@ -207,7 +265,7 @@ void login(void)
     {
       main();
     }
-    valid = find_user(username, pwd);
+    valid = find_user(username, pwd, files);
   } while (valid == 0);
 
   printf("User succesfully logged in!\n");

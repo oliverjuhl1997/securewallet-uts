@@ -18,6 +18,7 @@ main function.
 struct file
 {
   char filename[MAX_FILENAME_LEN];
+  int size;
   struct file *next;
 };
 
@@ -38,12 +39,15 @@ int main(void);
 void print_auth_menu(void);
 void print_login(void);
 /* Authentication related functions */
-int find_user(char username[], char pwd[]);
+int find_user(char username[], char pwd[], file_t *files);
 int valid_password(char password[]);
 void register_user(void);
-void login(void);
-void auth_choice(int choice); /* Dont forget to add user_t *user */
+void login(file_t *files);
+void auth_choice(int choice, file_t* files); /* Dont forget to add user_t *user */
 /* Encryption related functions */
 void simple_encrypt(char pwd[]);
 void simple_decrypt(char pwd[]);
 void xor_encryption(char pwd[]);
+/* Loading a user related functions*/
+file_t* add_file(file_t *head, char filename[], int file_size);
+void print_files(file_t *head);
