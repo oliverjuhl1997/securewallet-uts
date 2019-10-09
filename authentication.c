@@ -13,21 +13,23 @@
  * - int user_id: an integer value containing the user_id (index) of the user
  * struct that has logged in.  User can either register or login - Allistair
 *******************************************************************************/
-void auth_choice(int choice, file_t* files)
+void auth_choice(int choice, user_t* user)
 {
-  switch (choice)
-  {
-  case 1:
-    login(files);
-    break;
-  case 2:
-    register_user();
-    break;
-  case 3:
-    exit(0);
-  default:
-    printf("Invalid option!\n");
-  }
+	switch (choice)
+	{
+	case 1:
+		login(user);
+		printf("Ok\n");
+		break;
+	case 2:
+		register_user();
+		break;
+	case 3:
+		exit(0);
+	default:
+		*user = NULL;
+		printf("Invalid option!\n");
+	}
 }
 
 /*******************************************************************************
@@ -38,9 +40,6 @@ void auth_choice(int choice, file_t* files)
  * inputs:
  * - char username[]: a string containing the username for the user
  * - char password[]: a string containing the password for the user
-
- Issues: If registering multiple users, the subroutine overwrites the line
- rather than adding the username and password to a new line
 *******************************************************************************/
 void register_user(void)
 {
@@ -80,71 +79,79 @@ void register_user(void)
  * outputs:
  * - int: 1 if user exists and matches the input else 0
 *******************************************************************************/
-int find_user(char username[], char pwd[], file_t *files)
-{
-  FILE *file = NULL;
-  file = fopen(DB_NAME, "r");
-  if (file == NULL)
-  {
-    printf("Unable to open file at path: %s", DB_NAME);
-    return 0;
-  }
-  char line_in_file[512];
+int find_user(char username[], char pwd[], user_t* user)
+{	
+	printf("test");
+	file_t *file1 = NULL;
+	FILE *file = NULL;
+	printf("Test");
+	file = fopen(DB_NAME, "r");
+	if (file == NULL)
+	{
+		printf("Unable to open file at path: %s", DB_NAME);
+		return 0;
+	}
+	char line_in_file[512];
+	while (fgets(line_in_file, 512, file))
+	{
+		printf("Test");
+		char temp_username[MAX_USERNAME_LEN + 1];
+		char temp_pwd[MAX_PWD_LEN + 1];
+		long int num_of_files = 0;
 
-  while (fgets(line_in_file, 512, file))
-  {
-    char temp_username[MAX_USERNAME_LEN + 1];
-    char temp_pwd[MAX_PWD_LEN + 1];
-    int num_of_files = 0;
+		char *part_of_line = strtok(line_in_file, " ");
+		int counter = 1;
+		char temp_filename[MAX_FILENAME_LEN + 1];
+		long int temp_filesize = 0;
+		do
+		{
+			if (counter == 1)
+			{
+				strcpy(temp_username, part_of_line);
+			}
+			else if (counter == 2)
+			{
+				strcpy(temp_pwd, part_of_line);
+			}
+			else if (counter == 3)
+			{
+				num_of_files = (long int)part_of_line;
+			}
+			else
+			{
+				if (counter % 2 == 0)
+				{
+				strcpy(temp_filename, part_of_line);
+				}
+				else
+				{
+				sscanf(part_of_line, "%ld", &temp_filesize);
+				user->files = add_file(file1, temp_filename, temp_filesize);
+				}
+			}
 
-    char *part_of_line = strtok(line_in_file, " ");
-    int counter = 1;
-    char temp_filename[MAX_FILENAME_LEN + 1];
-    int temp_filesize = 0;
-    do
-    {
-      if (counter == 1)
-      {
-        strcpy(temp_username, part_of_line);
-      }
-      else if (counter == 2)
-      {
-        strcpy(temp_pwd, part_of_line);
-      }
-      else if (counter == 3)
-      {
-        num_of_files = (int)part_of_line;
-      }
-      else
-      {
-        if (counter % 2 == 0)
-        {
-          strcpy(temp_filename, part_of_line);
-        }
-        else
-        {
-          sscanf(part_of_line, "%d", &temp_filesize);
-          files = add_file(files, temp_filename, temp_filesize);
-        }
-      }
+			part_of_line = strtok(NULL, " ");
+			counter++;
+		} while ((part_of_line != NULL));
+		printf("Test");
+		if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
+		{
+			printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd);
+			fclose(file);
+			strcpy(user->username, username);
+			strcpy(user->pwd, pwd);
 
-      part_of_line = strtok(NULL, " ");
-      counter++;
-    } while ((part_of_line != NULL));
-
-    if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
-    {
-      printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd);
-      fclose(file);
-      return 1;
-    }
-    else
-    {
-      files = NULL;
-      printf("User not found\n");
-    }
-  }
-  return 0;
+			return 1;
+		}
+		else
+		{
+			user->files = NULL;
+			user = NULL;
+			printf("User not found\n");
+			printf("Number of files: %ld", num_of_files);
+		}
+	}
+	return 0;
 }
 
 /*******************************************************************************
@@ -176,9 +183,9 @@ file_t *add_file(file_t *head, char filename[], int filesize)
  * - file_t *head: Pointer to the current first element of the list
  * outputs: none
 *******************************************************************************/
-void print_files(file_t *head)
+void print_files(user_t *user)
 {
-  file_t *current = head;
+  file_t *current = user->files;
   while (current != NULL)
   {
     printf("User has file %s with size %i", current->filename, current->size);
@@ -243,8 +250,10 @@ void print_auth_menu(void)
  * inputs: none
  * outputs: none
 *******************************************************************************/
-void login(file_t *files)
+void login(user_t** user)
 {
+  printf("test\n");
+  printf("%s\n", (*user)->username);
   int valid = 0;
   char username[MAX_USERNAME_LEN + 1];
   char pwd[MAX_PWD_LEN + 1];
@@ -265,7 +274,8 @@ void login(file_t *files)
     {
       main();
     }
-    valid = find_user(username, pwd, files);
+
+    /*valid = find_user(username, pwd, user);*/
   } while (valid == 0);
 
   printf("User succesfully logged in!\n");
