@@ -39,7 +39,7 @@ int main(void);
 void print_auth_menu(void);
 void print_login(void);
 /* Authentication related functions */
-int find_user(char username[], char pwd[], user_t* user);
+int find_user(char username[], char pwd[], user_t** user);
 int valid_password(char password[]);
 void register_user(void);
 void login(user_t** user);
@@ -49,5 +49,5 @@ void auth_choice(int choice, user_t** user); /* Dont forget to add user_t *user 
 /* void simple_decrypt(char pwd[]); */
 /* void xor_encryption(char pwd[]); */
 /* Loading a user related functions*/
-file_t* add_file(file_t *head, char filename[], int file_size);
-void print_files(user_t *user);
+void add_file(file_t *head, char filename[], int file_size);
+void print_files(file_t* user);

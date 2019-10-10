@@ -13,7 +13,7 @@
  * - int user_id: an integer value containing the user_id (index) of the user
  * struct that has logged in.  User can either register or login - Allistair
 *******************************************************************************/
-void auth_choice(int choice, user_t* user)
+void auth_choice(int choice, user_t** user)
 {
 	switch (choice)
 	{
@@ -27,7 +27,7 @@ void auth_choice(int choice, user_t* user)
 	case 3:
 		exit(0);
 	default:
-		*user = NULL;
+		user = NULL;
 		printf("Invalid option!\n");
 	}
 }
@@ -44,16 +44,13 @@ void auth_choice(int choice, user_t* user)
 void register_user(void)
 {
   user_t user;
-  file_t *head = NULL;
 
   printf("Enter usename: ");
   scanf("%s", user.username);
   printf("Enter password: ");
   scanf("%s", user.pwd);
 
-  printf("%d\n", valid_password(user.pwd));
-
-  user.files = head;
+  user.files = NULL;
 
   FILE *file = NULL;
   file = fopen(DB_NAME, "w");
@@ -61,7 +58,7 @@ void register_user(void)
   {
     printf("Unable to open file at path: %s", DB_NAME);
   }
-  fprintf(file, "%s %s", user.username, user.pwd);
+  fprintf(file, "%s %s %i", user.username, user.pwd, 0);
   fclose(file);
 
   printf("successfully registered user\n\n");
@@ -79,12 +76,12 @@ void register_user(void)
  * outputs:
  * - int: 1 if user exists and matches the input else 0
 *******************************************************************************/
-int find_user(char username[], char pwd[], user_t* user)
-{	
-	printf("test");
-	file_t *file1 = NULL;
+int find_user(char username[], char pwd[], user_t** user)
+{
 	FILE *file = NULL;
-	printf("Test");
+  user_t* temp_user = *user;
+  temp_user->files = malloc(sizeof(file_t));
+
 	file = fopen(DB_NAME, "r");
 	if (file == NULL)
 	{
@@ -94,7 +91,6 @@ int find_user(char username[], char pwd[], user_t* user)
 	char line_in_file[512];
 	while (fgets(line_in_file, 512, file))
 	{
-		printf("Test");
 		char temp_username[MAX_USERNAME_LEN + 1];
 		char temp_pwd[MAX_PWD_LEN + 1];
 		long int num_of_files = 0;
@@ -126,32 +122,50 @@ int find_user(char username[], char pwd[], user_t* user)
 				else
 				{
 				sscanf(part_of_line, "%ld", &temp_filesize);
-				user->files = add_file(file1, temp_filename, temp_filesize);
+				add_file(temp_user->files, temp_filename, temp_filesize);
 				}
 			}
 
 			part_of_line = strtok(NULL, " ");
 			counter++;
 		} while ((part_of_line != NULL));
-		printf("Test");
+
 		if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
 		{
 			printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd);
 			fclose(file);
-			strcpy(user->username, username);
-			strcpy(user->pwd, pwd);
+			strcpy(temp_user->username, username);
+			strcpy(temp_user->pwd, pwd);
 
 			return 1;
 		}
 		else
 		{
-			user->files = NULL;
-			user = NULL;
+			temp_user->files = NULL;
+			temp_user = NULL;
 			printf("User not found\n");
 			printf("Number of files: %ld", num_of_files);
 		}
 	}
 	return 0;
+}
+
+/*******************************************************************************
+ * Author: Oliver Windall Juhl
+ * Basic helper function to print the elements of the linked list.
+ * (DEBUGGING PURPOSES)
+ * inputs:
+ * - file_t *head: Pointer to the current first element of the list
+ * outputs: none
+*******************************************************************************/
+void print_files(file_t* files)
+{
+  file_t *current = files;
+  while (current != NULL)
+  {
+    printf("User has file %s with size %i\n", current->filename, current->size);
+    current = current->next;
+  }
 }
 
 /*******************************************************************************
@@ -165,32 +179,14 @@ int find_user(char username[], char pwd[], user_t* user)
  * outputs:
  * - file_t: The new head of the linked list
 *******************************************************************************/
-file_t *add_file(file_t *head, char filename[], int filesize)
+void add_file(file_t *head, char filename[], int filesize)
 {
   file_t *new_file = malloc(sizeof(file_t));
   strcpy(new_file->filename, filename);
   new_file->size = filesize;
   new_file->next = head;
-  head = new_file;
-  return head;
-}
-
-/*******************************************************************************
- * Author: Oliver Windall Juhl
- * Basic helper function to print the elements of the linked list.
- * (DEBUGGING PURPOSES)
- * inputs:
- * - file_t *head: Pointer to the current first element of the list
- * outputs: none
-*******************************************************************************/
-void print_files(user_t *user)
-{
-  file_t *current = user->files;
-  while (current != NULL)
-  {
-    printf("User has file %s with size %i", current->filename, current->size);
-    current = current->next;
-  }
+  head->next = new_file;
+  printf("Added file -> %s\n", filename);
 }
 
 /*******************************************************************************
@@ -252,8 +248,6 @@ void print_auth_menu(void)
 *******************************************************************************/
 void login(user_t** user)
 {
-  printf("test\n");
-  printf("%s\n", (*user)->username);
   int valid = 0;
   char username[MAX_USERNAME_LEN + 1];
   char pwd[MAX_PWD_LEN + 1];
@@ -275,7 +269,7 @@ void login(user_t** user)
       main();
     }
 
-    /*valid = find_user(username, pwd, user);*/
+    valid = find_user(username, pwd, user);
   } while (valid == 0);
 
   printf("User succesfully logged in!\n");

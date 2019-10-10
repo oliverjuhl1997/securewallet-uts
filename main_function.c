@@ -11,14 +11,14 @@ int main(void) {
 	int choice;
 	user_t* user;
 	user = malloc(sizeof(user_t));
-	user = NULL;
-	printf("Initial value of name is %s \n", user->username);
-	while(user == NULL)
+
+	while(strlen(user->username) == 0 || strlen(user->pwd) == 0)
 	{
 		print_auth_menu();
 		scanf("%d", &choice);
 		auth_choice(choice, &user);
-		printf("Username in main is %s \n", user->username);
+		printf("Head of file is -> %s \n", user->files->filename);
+		print_files(user->files);
 	}
 
 	while (!(user == NULL))
