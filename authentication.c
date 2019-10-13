@@ -19,7 +19,6 @@ void auth_choice(int choice, user_t** user)
 	{
 	case 1:
 		login(user);
-		printf("Ok\n");
 		break;
 	case 2:
 		register_user();
@@ -43,25 +42,32 @@ void auth_choice(int choice, user_t** user)
 *******************************************************************************/
 void register_user(void)
 {
-  user_t user;
+	user_t user;
 
-  printf("Enter usename: ");
-  scanf("%s", user.username);
-  printf("Enter password: ");
-  scanf("%s", user.pwd);
+	printf("Enter usename: ");
+	scanf("%s", user.username);
+	printf("Enter password: ");
+	scanf("%s", user.pwd);
 
-  user.files = NULL;
+	user.files = NULL;
+	FILE *file = NULL;
 
-  FILE *file = NULL;
-  file = fopen(DB_NAME, "w");
-  if (file == NULL)
-  {
-    printf("Unable to open file at path: %s", DB_NAME);
-  }
-  fprintf(file, "%s %s %i", user.username, user.pwd, 0);
-  fclose(file);
-
-  printf("successfully registered user\n\n");
+	file = fopen(DB_NAME, "a");
+	if (file == NULL)
+	{
+		printf("Unable to open file at path: %s\n", DB_NAME);
+	}
+	if (calculcateSize(DB_NAME) == 0)
+	{
+		fprintf(file, "%s %s %i", user.username, user.pwd, 0);
+	}
+	else
+	{
+		fprintf(file, "\n%s %s %i", user.username, user.pwd, 0);
+	}
+	
+	fclose(file);
+	printf("Successfully registered user\n\n");
 }
 
 /*******************************************************************************
@@ -79,24 +85,29 @@ void register_user(void)
 int find_user(char username[], char pwd[], user_t** user)
 {
 	FILE *file = NULL;
-  user_t* temp_user = *user;
-  temp_user->files = malloc(sizeof(file_t));
-
 	file = fopen(DB_NAME, "r");
+	int line = 0;
 	if (file == NULL)
 	{
-		printf("Unable to open file at path: %s", DB_NAME);
+		printf("Unable to open file at path: %s\n", DB_NAME);
 		return 0;
 	}
 	char line_in_file[512];
+	
 	while (fgets(line_in_file, 512, file))
 	{
+		/*
+		user_t* temp_user = *user; 
+		(*user)->files = malloc(sizeof(file_t)); */
+
+		(*user) = malloc(sizeof(user_t));
+		(*user)->files = malloc(sizeof(file_t));
 		char temp_username[MAX_USERNAME_LEN + 1];
 		char temp_pwd[MAX_PWD_LEN + 1];
-		long int num_of_files = 0;
-
-		char *part_of_line = strtok(line_in_file, " ");
+		int num_of_files = 0;
 		int counter = 1;
+		line++;
+		char *part_of_line = strtok(line_in_file, " ");
 		char temp_filename[MAX_FILENAME_LEN + 1];
 		long int temp_filesize = 0;
 		do
@@ -111,45 +122,71 @@ int find_user(char username[], char pwd[], user_t** user)
 			}
 			else if (counter == 3)
 			{
-				num_of_files = (long int)part_of_line;
+				char tmpStr[10];
+				strcpy(tmpStr, part_of_line);
+				num_of_files = atoi(tmpStr);
 			}
 			else
 			{
 				if (counter % 2 == 0)
 				{
-				strcpy(temp_filename, part_of_line);
+					strcpy(temp_filename, part_of_line);
+					num_of_files++;
 				}
 				else
 				{
-				sscanf(part_of_line, "%ld", &temp_filesize);
-				add_file(temp_user->files, temp_filename, temp_filesize);
+					sscanf(part_of_line, "%ld", &temp_filesize);
+					add_file((*user)->files, temp_filename, temp_filesize);
+		
 				}
 			}
-
 			part_of_line = strtok(NULL, " ");
 			counter++;
 		} while ((part_of_line != NULL));
-
+		
 		if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
 		{
-			printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd);
+			printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd); /* DEBUG STATEMENT */ 
+			strcpy((*user)->username, temp_username); 
+			strcpy((*user)->pwd, temp_pwd);
+			(*user)->line = line;
+			(*user)->num_files = num_of_files;
 			fclose(file);
-			strcpy(temp_user->username, username);
-			strcpy(temp_user->pwd, pwd);
 
 			return 1;
 		}
 		else
 		{
-			temp_user->files = NULL;
-			temp_user = NULL;
 			printf("User not found\n");
-			printf("Number of files: %ld", num_of_files);
+			printf("Number of files: %d\n", num_of_files);
+			(*user)->files = NULL; 
+			(*user) = NULL;
+
+			
 		}
 	}
 	return 0;
 }
-
+/*******************************************************************************
+ * Author: Gabriel Bogomolets
+ * Since the head of linked list after creation is blank, this function will 
+ * delete the invalid head of the linked list, and shift all the elements.
+ * inputs:
+ * - file_t *head: Pointer to the current first element of the list
+ * outputs: none
+*******************************************************************************/
+file_t* removeHead(file_t* files)
+{
+	file_t *temp = files;
+	file_t *holder;
+	if (!(temp==NULL))
+	{
+		holder = temp->next;
+		free(temp);
+		files = holder;
+	}
+	return files;
+}
 /*******************************************************************************
  * Author: Oliver Windall Juhl
  * Basic helper function to print the elements of the linked list.
@@ -169,7 +206,7 @@ void print_files(file_t* files)
 }
 
 /*******************************************************************************
- * Author: Oliver Windall Juhl
+ * Author: Oliver Windall Juhl / Gabriel Bogomolets
  * This function adds a file struct to the linked list of files. Currently, we
  * save only filename and size withing the elements of the linked list.
  * inputs:
@@ -181,12 +218,29 @@ void print_files(file_t* files)
 *******************************************************************************/
 void add_file(file_t *head, char filename[], int filesize)
 {
-  file_t *new_file = malloc(sizeof(file_t));
+  file_t *new_file = (file_t*)malloc(sizeof(file_t));
   strcpy(new_file->filename, filename);
   new_file->size = filesize;
-  new_file->next = head;
-  head->next = new_file;
-  printf("Added file -> %s\n", filename);
+  printf("test\n");
+  new_file->next = NULL;
+  if (head->next == NULL)
+  {
+	  printf("test\n");
+	  head->next = new_file;
+	  printf("test\n");
+	  /* printf("Added at the beginning of linked list\n");   DEBUG STATEMENT */ 
+  }
+  else
+  {
+  	  file_t *current = head;
+	  while (!(current->next == NULL))
+	  {
+	  	  current = current->next;
+	  }
+	  current->next = new_file;
+	  /* printf("added Later\n");  DEBUG STATEMENT */ 
+  }
+  printf("Added file -> %s\n", filename); /* DEBUG STATEMENT */ 
 }
 
 /*******************************************************************************
@@ -252,7 +306,7 @@ void login(user_t** user)
   char username[MAX_USERNAME_LEN + 1];
   char pwd[MAX_PWD_LEN + 1];
 
-  printf("Enter login details! (or press 'b' to go back) \n");
+  printf("Enter login details or press B to go back\n");
   do
   {
     print_login();
@@ -268,7 +322,6 @@ void login(user_t** user)
     {
       main();
     }
-
     valid = find_user(username, pwd, user);
   } while (valid == 0);
 
