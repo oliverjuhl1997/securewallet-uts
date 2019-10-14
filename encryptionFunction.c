@@ -35,12 +35,12 @@ void options_main(user_t** usr)
 *******************************************************************************/
 void enter_file(user_t** usr)
 {
-	user_t* user = *usr;
-	print_files(user->files);
+	int counter = 0;
 	char filename_temp[MAX_FILENAME_LEN];
 	printf("Enter the name of the file you wish to encrypt>\n");
 	scanf("%s", filename_temp);
 	encrypt_file(filename_temp, usr);
+	counter++;
 	return;
 }
 
@@ -82,7 +82,7 @@ void encrypt_file(char filename[], user_t** usr)
  		putc(xor_encryption(currentChar), newFile);
   	}
 	printf("%s successfully encrypted! New name of file is %s\n", filename, encryp_name);
-	add_file((*usr)->files, encryp_name, fileSize);
+	add_file(usr, encryp_name, fileSize);
 	(*usr)->num_files++;
 
   	fclose(pFILE);
@@ -97,10 +97,9 @@ void encrypt_file(char filename[], user_t** usr)
  * - char filename[]: The name of the file
  * outputs:
  * - int fileSize: The size of the file in bytes
-******************************************************************************
+******************************************************************************/
 void saveUser(user_t** usr)
 {
-	user_t* user = *usr;
 	FILE *file1 = NULL;
 	FILE *file2 = NULL;
 	int lno, count = 0;
@@ -116,7 +115,7 @@ void saveUser(user_t** usr)
 		fclose(file1);
 		return;
 	}
-	lno = user->line;
+	lno = (*usr)->line;
 	count = 0;
 	while ((fgets(str, 512, file1)) != NULL)
     {
@@ -124,8 +123,8 @@ void saveUser(user_t** usr)
      
         if (count == lno)
 		{
-			fprintf(file2, "%s %s %i", user->username, user->pwd, user->num_files);
-			file_t* current = user->files;
+			fprintf(file2, "%s %s %i", (*usr)->username, (*usr)->pwd, (*usr)->num_files);
+			file_t* current = (*usr)->files;
 			while (current != NULL)
 			{
 				fprintf(file2, " %s %d", current->filename, current->size);
@@ -145,7 +144,7 @@ void saveUser(user_t** usr)
     rename(temp, DB_NAME); 
     printf(" Replacement did successfully..!! \n");
 }
-*/
+
 
 /*******************************************************************************
  * Author: Gabriel
@@ -192,6 +191,7 @@ void print_options(void)
 *******************************************************************************/
 void auth_option_choice(int choice, user_t** user)
 {
+	print_files((*user)->files);
 	switch (choice)
 	{
 	case 1:
@@ -199,9 +199,39 @@ void auth_option_choice(int choice, user_t** user)
 		break;
 	case 2:
 		enter_file(user);
+		printf("%d\n", (*user)->num_files);
+		if ((*user)->num_files == 1)
+		{
+			(*user)->files = removeHead((*user)->files, 1);
+		}
+		saveUser(user);
 		break;
 	case 3:
-		printf("Decrypt File\n");
+		if ((*user)->num_files == 0)
+		{
+			printf("No files registered with user %s\n", (*user)->username);
+			break;
+		}
+		decrypt_file(user);
+		printf("%d\n", (*user)->num_files);
+		/*
+		if ((*user)->num_files == 0)
+		{
+			file_t *new_file = (file_t*)malloc(sizeof(file_t));
+			int test = 0;
+
+			char null[2];
+			strcpy(null, "g");
+			
+			strcpy(new_file->filename, null);
+			new_file->size = test;
+			new_file->next = NULL;
+
+			(*user)->files = new_file;
+			(*user)->num_files = 0;
+		}
+		*/
+		break;
 	case 4:
 		choice = 4;
 		break;

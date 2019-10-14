@@ -96,9 +96,6 @@ int find_user(char username[], char pwd[], user_t** user)
 	
 	while (fgets(line_in_file, 512, file))
 	{
-		/*
-		user_t* temp_user = *user; 
-		(*user)->files = malloc(sizeof(file_t)); */
 
 		(*user) = malloc(sizeof(user_t));
 		(*user)->files = malloc(sizeof(file_t));
@@ -128,16 +125,17 @@ int find_user(char username[], char pwd[], user_t** user)
 			}
 			else
 			{
-				if (counter % 2 == 0)
+				if (num_of_files > 0)
 				{
+					if (counter % 2 == 0)
+					{
 					strcpy(temp_filename, part_of_line);
-					num_of_files++;
-				}
-				else
-				{
+					}
+					else
+					{
 					sscanf(part_of_line, "%ld", &temp_filesize);
-					add_file((*user)->files, temp_filename, temp_filesize);
-		
+					add_file((user), temp_filename, temp_filesize);
+					}
 				}
 			}
 			part_of_line = strtok(NULL, " ");
@@ -146,11 +144,15 @@ int find_user(char username[], char pwd[], user_t** user)
 		
 		if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
 		{
-			printf("Found -> username: %s, password: %s\n", temp_username, temp_pwd); /* DEBUG STATEMENT */ 
+			printf("Found -> username: %s, password: %s and number of files is %d\n", temp_username, temp_pwd, num_of_files); /* DEBUG STATEMENT */ 
 			strcpy((*user)->username, temp_username); 
 			strcpy((*user)->pwd, temp_pwd);
 			(*user)->line = line;
 			(*user)->num_files = num_of_files;
+			if (num_of_files > 0)
+			{
+				(*user)->files = removeHead((*user)->files, (*user)->num_files);
+			}
 			fclose(file);
 
 			return 1;
@@ -161,6 +163,7 @@ int find_user(char username[], char pwd[], user_t** user)
 			printf("Number of files: %d\n", num_of_files);
 			(*user)->files = NULL; 
 			(*user) = NULL;
+			num_of_files = 0;
 
 			
 		}
@@ -175,7 +178,7 @@ int find_user(char username[], char pwd[], user_t** user)
  * - file_t *head: Pointer to the current first element of the list
  * outputs: none
 *******************************************************************************/
-file_t* removeHead(file_t* files)
+file_t* removeHead(file_t* files, int num)
 {
 	file_t *temp = files;
 	file_t *holder;
@@ -184,6 +187,10 @@ file_t* removeHead(file_t* files)
 		holder = temp->next;
 		free(temp);
 		files = holder;
+		if (num <= 0)
+		{
+			files = NULL;
+		}
 	}
 	return files;
 }
@@ -216,23 +223,23 @@ void print_files(file_t* files)
  * outputs:
  * - file_t: The new head of the linked list
 *******************************************************************************/
-void add_file(file_t *head, char filename[], int filesize)
+void add_file(user_t** user, char filename[], int filesize)
 {
   file_t *new_file = (file_t*)malloc(sizeof(file_t));
+ /* (*user)->files = malloc(sizeof(file_t)); */
   strcpy(new_file->filename, filename);
   new_file->size = filesize;
-  printf("test\n");
   new_file->next = NULL;
-  if (head->next == NULL)
+
+  if ((*user)->files->next == NULL)
   {
-	  printf("test\n");
-	  head->next = new_file;
-	  printf("test\n");
+	  (*user)->files->next = new_file;
 	  /* printf("Added at the beginning of linked list\n");   DEBUG STATEMENT */ 
   }
   else
   {
-  	  file_t *current = head;
+  	  file_t *current = (*user)->files;
+
 	  while (!(current->next == NULL))
 	  {
 	  	  current = current->next;

@@ -41,9 +41,10 @@ void print_auth_menu(void);
 void print_login(void);
 /* Authentication related functions */
 int find_user(char username[], char pwd[], user_t** user);
+void saveUser(user_t** usr);
 int valid_password(char password[]);
 void register_user(void);
-file_t* removeHead(file_t* files);
+file_t* removeHead(file_t* files, int num);
 void login(user_t** user);
 void auth_choice(int choice, user_t** user); 
 /* Encryption related functions */
@@ -51,8 +52,12 @@ void enter_file(user_t** usr);
 void encrypt_file(char filename[], user_t** usr);
 char xor_encryption(char pwd);
 int calculcateSize(char filename[]);
+/* Decryption related functions */
+void decrypt_file(user_t** usr);
+void decryption(char filename[], user_t** usr);
+void deleteNode(user_t** user, char filename[]);
 /* Loading a user related functions*/
-void add_file(file_t *head, char filename[], int file_size);
+void add_file(user_t** user, char filename[], int file_size);
 void print_files(file_t* user);
 /* Options related functions */
 void options_main(user_t** usr);
