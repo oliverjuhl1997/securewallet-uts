@@ -58,6 +58,7 @@ void decryption(char filename[], user_t** usr)
 			old_name[i] = encryp_name[i];
 		}
 	}
+	strcat(old_name, ".txt");
 	strcat(old_name, "\0");
 	printf("%s\n", old_name);
 
@@ -70,46 +71,18 @@ void decryption(char filename[], user_t** usr)
     }
 
 	FILE *newFile = NULL;
-    newFile = fopen(filename, "w");
+    newFile = fopen(old_name, "w");
 
 	char currentChar;
 	while ((currentChar = getc(pFILE)) != EOF) 
   	{	
  		putc(xor_encryption(currentChar), newFile);
   	}
-	printf("%s successfully Decrypted File! New name of file is %s\n", filename, encryp_name);
-	deleteNode(usr, filename);
-	printf("test\n");
+	printf("%s successfully Decrypted File! New name of file is %s\n", filename, old_name);
 	print_files((*usr)->files);
 
   	fclose(pFILE);
   	fclose(newFile);
 	
 	return;
-}
-
-void deleteNode(user_t** user, char filename[])
-{
-	file_t *temp = (*user)->files, *prev;
-
-	if (temp != NULL && (strcmp(temp->filename, filename) == 0))
-	{
-		printf("Head\n");
-		(*user)->files = temp->next;
-		free(temp);
-		(*user)->files = malloc(sizeof(file_t));
-		(*user)->files = NULL;
-		(*user)->num_files--;
-		printf("Head\n");
-		return;
-	}
-	while (temp != NULL && (strcmp(temp->filename, filename) == 1))
-	{
-		prev = temp;
-		temp = temp->next;
-	}
-	prev->next = temp->next;
-	printf("Test\n");
-	(*user)->num_files--;
-	free(temp);
 }

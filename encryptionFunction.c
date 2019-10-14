@@ -214,23 +214,6 @@ void auth_option_choice(int choice, user_t** user)
 		}
 		decrypt_file(user);
 		printf("%d\n", (*user)->num_files);
-		/*
-		if ((*user)->num_files == 0)
-		{
-			file_t *new_file = (file_t*)malloc(sizeof(file_t));
-			int test = 0;
-
-			char null[2];
-			strcpy(null, "g");
-			
-			strcpy(new_file->filename, null);
-			new_file->size = test;
-			new_file->next = NULL;
-
-			(*user)->files = new_file;
-			(*user)->num_files = 0;
-		}
-		*/
 		break;
 	case 4:
 		choice = 4;

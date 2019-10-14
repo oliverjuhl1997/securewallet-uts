@@ -55,7 +55,6 @@ int calculcateSize(char filename[]);
 /* Decryption related functions */
 void decrypt_file(user_t** usr);
 void decryption(char filename[], user_t** usr);
-void deleteNode(user_t** user, char filename[]);
 /* Loading a user related functions*/
 void add_file(user_t** user, char filename[], int file_size);
 void print_files(file_t* user);
