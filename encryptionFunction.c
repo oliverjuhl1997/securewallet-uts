@@ -57,7 +57,6 @@ void enter_file(user_t** usr)
 void encrypt_file(char filename[], user_t** usr)
 {
 	char encryp_name[MAX_FILENAME_LEN + 3];
-
 	strcpy(encryp_name, filename);
  	strcat(filename, ".txt");
 	strcat(encryp_name, "(en).txt");
@@ -82,12 +81,28 @@ void encrypt_file(char filename[], user_t** usr)
  		putc(xor_encryption(currentChar), newFile);
   	}
 	printf("%s successfully encrypted! New name of file is %s\n", filename, encryp_name);
-	add_file(usr, encryp_name, fileSize);
-	(*usr)->num_files++;
+	if ((*usr)->num_files <= 0)
+	{
+		(*usr)->files = NULL;
+		printf("First file \n");
+		(*usr)->files = prepend(encryp_name, fileSize, (*usr)->files);
+		(*usr)->num_files = (*usr)->num_files + 1;
+		
+	}
+	else
+	{
+		printf("Second file \n");
+		(*usr)->files = append(encryp_name, fileSize, (*usr)->files);
+		(*usr)->num_files++;
+	}
+	printf("%d\n", (*usr)->num_files);
+	printf("Files being printed...\n");
+	print_files((*usr)->files);
 
   	fclose(pFILE);
   	fclose(newFile);
 
+	
 	return;
 }
 /*******************************************************************************
@@ -192,6 +207,7 @@ void print_options(void)
 void auth_option_choice(int choice, user_t** user)
 {
 	print_files((*user)->files);
+	printf("The number of files is %d\n", (*user)->num_files);
 	switch (choice)
 	{
 	case 1:
@@ -199,11 +215,6 @@ void auth_option_choice(int choice, user_t** user)
 		break;
 	case 2:
 		enter_file(user);
-		printf("%d\n", (*user)->num_files);
-		if ((*user)->num_files == 1)
-		{
-			(*user)->files = removeHead((*user)->files, 1);
-		}
 		saveUser(user);
 		break;
 	case 3:
@@ -213,7 +224,7 @@ void auth_option_choice(int choice, user_t** user)
 			break;
 		}
 		decrypt_file(user);
-		printf("%d\n", (*user)->num_files);
+		saveUser(user);
 		break;
 	case 4:
 		choice = 4;

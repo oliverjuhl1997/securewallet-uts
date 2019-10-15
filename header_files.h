@@ -54,7 +54,7 @@ char xor_encryption(char pwd);
 int calculcateSize(char filename[]);
 /* Decryption related functions */
 void decrypt_file(user_t** usr);
-void decryption(char filename[], user_t** usr);
+void decryption(char filename[], char newFile[], user_t** usr);
 /* Loading a user related functions*/
 void add_file(user_t** user, char filename[], int file_size);
 void print_files(file_t* user);
@@ -62,3 +62,8 @@ void print_files(file_t* user);
 void options_main(user_t** usr);
 void print_options(void);
 void auth_option_choice(int choice, user_t** user);
+
+file_t* create(char filename[], int filesize, file_t* next);
+file_t* prepend(char filename[], int filesize, file_t* head);
+file_t* append(char filename[], int filesize, file_t* head);
+file_t* removeNode(file_t* head, int files, char filename[]);

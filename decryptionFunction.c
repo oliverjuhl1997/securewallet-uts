@@ -28,7 +28,7 @@ void decrypt_file(user_t** usr)
 	}
 	if (true == 1)
 	{
-		decryption(temp_string, usr);
+		decryption(temp_string, filename_temp, usr);
 	}
 	else
 	{
@@ -36,33 +36,12 @@ void decrypt_file(user_t** usr)
 	}
 }
 
-void decryption(char filename[], user_t** usr)
+void decryption(char filename[], char newfile[], user_t** usr)
 {
-	char encryp_name[MAX_FILENAME_LEN + 3];
-	char old_name[MAX_FILENAME_LEN + 1];
-
-	strcpy(encryp_name, filename);
-	char name[10];
-	strcpy(name, "(en).txt");
-	int length;
-	length = strlen(name);
-	int i;
-	for (i=0; i<=strlen(encryp_name); i++)
-	{
-		if (i == (strlen(encryp_name) - length))
-		{
-			break;
-		}
-		else
-		{
-			old_name[i] = encryp_name[i];
-		}
-	}
-	strcat(old_name, ".txt");
-	strcat(old_name, "\0");
-	printf("%s\n", old_name);
-
+	strcat(newfile, ".txt");
 	FILE *pFILE = NULL;
+	file_t* head = (*usr)->files;
+
  	pFILE = fopen(filename, "r");
 
 	if (pFILE == NULL) {
@@ -71,18 +50,67 @@ void decryption(char filename[], user_t** usr)
     }
 
 	FILE *newFile = NULL;
-    newFile = fopen(old_name, "w");
+    newFile = fopen(newfile, "w");
 
 	char currentChar;
 	while ((currentChar = getc(pFILE)) != EOF) 
   	{	
  		putc(xor_encryption(currentChar), newFile);
   	}
-	printf("%s successfully Decrypted File! New name of file is %s\n", filename, old_name);
-	print_files((*usr)->files);
+	printf("%s successfully Decrypted File! New name of file is %s\n", filename, newfile);
+	printf("%s\n", filename);
+	
+	printf("The number of files is %d\n", (*usr)->num_files);
+	head = removeNode(head, (*usr)->num_files, filename);
+	print_files(head);
+	(*usr)->files = head;
+	(*usr)->num_files = (*usr)->num_files - 1;
+	
 
   	fclose(pFILE);
   	fclose(newFile);
 	
 	return;
 }
+file_t* removeNode(file_t* head, int files, char filename[])
+{
+	if (files <= 1)
+	{
+		head = head->next;
+		head = NULL;
+		return head;
+	}
+	else
+	{
+		/* The head of the linked list */
+		if (strcmp(head->filename, filename) == 0)
+		{
+			printf("File found\n");
+			file_t* temp = head;
+			head = head -> next;
+			free(temp);
+			return head;
+		}
+		else
+		{
+			file_t* current = head->next;
+			file_t* previous = head;
+			while (current != NULL && previous != NULL)
+			{
+				if (strcmp(filename, current->filename) == 0)
+				{
+					file_t* temp = current;
+					previous->next = current->next;
+					free(temp);
+					return head;
+				}
+				previous = current;
+				current = current->next;
+			}
+			return head;
+		}
+	}
+	return head;
+}	
+
+

@@ -93,16 +93,17 @@ int find_user(char username[], char pwd[], user_t** user)
 		return 0;
 	}
 	char line_in_file[512];
-	
-	while (fgets(line_in_file, 512, file))
-	{
+	(*user) = malloc(sizeof(user_t));
+	(*user)->files = malloc(sizeof(file_t));
 
-		(*user) = malloc(sizeof(user_t));
-		(*user)->files = malloc(sizeof(file_t));
+	while (fgets(line_in_file, 512, file))
+	{	
+		file_t* head = NULL;
 		char temp_username[MAX_USERNAME_LEN + 1];
 		char temp_pwd[MAX_PWD_LEN + 1];
 		int num_of_files = 0;
 		int counter = 1;
+		int first_file = 0;
 		line++;
 		char *part_of_line = strtok(line_in_file, " ");
 		char temp_filename[MAX_FILENAME_LEN + 1];
@@ -129,12 +130,20 @@ int find_user(char username[], char pwd[], user_t** user)
 				{
 					if (counter % 2 == 0)
 					{
-					strcpy(temp_filename, part_of_line);
+						strcpy(temp_filename, part_of_line);
 					}
 					else
 					{
-					sscanf(part_of_line, "%ld", &temp_filesize);
-					add_file((user), temp_filename, temp_filesize);
+						first_file++;
+						sscanf(part_of_line, "%ld", &temp_filesize);
+						if (first_file == 1)
+						{
+							head = prepend(temp_filename, temp_filesize, head);
+						}
+						else
+						{
+							head = append(temp_filename, temp_filesize, head);
+						}
 					}
 				}
 			}
@@ -149,10 +158,15 @@ int find_user(char username[], char pwd[], user_t** user)
 			strcpy((*user)->pwd, temp_pwd);
 			(*user)->line = line;
 			(*user)->num_files = num_of_files;
+			(*user)->files = head;
+			printf("Files being printed...\n");
+			print_files((*user)->files);
+			/*
 			if (num_of_files > 0)
 			{
 				(*user)->files = removeHead((*user)->files, (*user)->num_files);
 			}
+			*/
 			fclose(file);
 
 			return 1;
@@ -161,14 +175,52 @@ int find_user(char username[], char pwd[], user_t** user)
 		{
 			printf("User not found\n");
 			printf("Number of files: %d\n", num_of_files);
-			(*user)->files = NULL; 
-			(*user) = NULL;
+			head = NULL;
 			num_of_files = 0;
 
 			
 		}
 	}
 	return 0;
+}
+
+file_t* create(char filename[], int filesize, file_t* next)
+{
+	printf("Test\n");
+    file_t* new_file = (file_t*)malloc(sizeof(file_t));
+    if(new_file == NULL)
+    {
+        printf("Error creating a new file.\n");
+        exit(0);
+    }
+	printf("Filename in create function is %s\n", filename);
+	strcpy(new_file->filename, filename);
+	new_file->size = filesize;
+    new_file->next = next;
+ 
+    return new_file;
+}
+file_t* prepend(char filename[], int filesize, file_t* head)
+{
+	printf("Test\n");
+    file_t* new_file = create(filename, filesize, head);
+    head = new_file;
+    return head;
+}
+file_t* append(char filename[], int filesize, file_t* head)
+{
+    if(head == NULL)
+        return NULL;
+    /* go to the last node */
+    file_t* current = head;
+    while(current->next != NULL)
+        current = current->next;
+ 
+    /* create a new node */
+    file_t* new_file =  create(filename, filesize, NULL);
+    current->next = new_file;
+ 
+    return head;
 }
 /*******************************************************************************
  * Author: Gabriel Bogomolets
@@ -194,6 +246,7 @@ file_t* removeHead(file_t* files, int num)
 	}
 	return files;
 }
+
 /*******************************************************************************
  * Author: Oliver Windall Juhl
  * Basic helper function to print the elements of the linked list.
@@ -223,6 +276,7 @@ void print_files(file_t* files)
  * outputs:
  * - file_t: The new head of the linked list
 *******************************************************************************/
+
 void add_file(user_t** user, char filename[], int filesize)
 {
   file_t *new_file = (file_t*)malloc(sizeof(file_t));

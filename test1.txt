@@ -1,0 +1,3 @@
+srcmp() compares the two strings lexicographically means it starts comparison character by character starting from the first character until the characters in both strings are equal or a NULL character is encountered.
+If first character in both strings are equal, then this function will check the second character, if this is also equal then it will check the third and so on
+This process will be continued until a character in either string is NULL or the characters are unequal.
