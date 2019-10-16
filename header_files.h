@@ -71,3 +71,22 @@ file_t* removeNode(file_t* head, int files, char filename[]);
 
 int removeNewLine(int checkOnce);
 int checkChar(char letter, char minLetter, char maxLetter);
+
+/* Searching and sorting functions */
+void dispFile_Menu(file_t* files);
+void dispFile_Options(file_t* files);
+
+void searchFiles(file_t* files);
+void sorting_Options(file_t* files);
+
+void sort_alph(file_t* files);
+void sort_alph_rev(file_t* files);
+void sort_size_asc(file_t* files);
+void sort_size_desc(file_t* files);
+void swap_files(file_t *ptr_a, file_t *ptr_b);
+void swap(file_t *a, file_t *b);
+
+void print_dispFile_options(void);
+void print_sorting_options(void);
+
+void print_result(file_t *current);

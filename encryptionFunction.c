@@ -210,7 +210,7 @@ void auth_option_choice(int choice, user_t** user)
 	switch (choice)
 	{
 	case 1:
-		printf("Display Files\n");
+		dispFile_Menu((*user)->files);
 		break;
 	case 2:
 		enter_file(user);
