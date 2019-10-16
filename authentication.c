@@ -13,7 +13,7 @@
  * - int user_id: an integer value containing the user_id (index) of the user
  * struct that has logged in.  User can either register or login - Allistair
 *******************************************************************************/
-void auth_choice(int choice, user_t** user)
+void auth_choice(int choice, user_t **user)
 {
 	switch (choice)
 	{
@@ -43,9 +43,9 @@ void auth_choice(int choice, user_t** user)
 void register_user(void)
 {
 	int valid = 0;
-	char username_buffer[200]; 
-	char pwd_buffer[200]; 
-    char string[200];
+	char username_buffer[200];
+	char pwd_buffer[200];
+	char string[200];
 	char usernameString[200];
 	int checkOnce = 1;
 
@@ -56,46 +56,53 @@ void register_user(void)
 
 		/* Gets the input using fgets and then checks if an empty
         line is entered */
-        char *usr_pointer = username_buffer;
-        fgets(username_buffer, 4096, stdin);
-        if (sscanf(username_buffer, "%s", usernameString) == -1)
-        {
-            printf("Invalid empty line\n");
-            continue;
-        }
-        /* Checks for spaces in the line */
-        if ((usr_pointer = strpbrk(usr_pointer, " ")))
-        {
-            printf("No spaces allowed\n");
-            continue;
-        }
+		char *usr_pointer = username_buffer;
+		fgets(username_buffer, 4096, stdin);
+#ifdef DEBUG
+		printf("DEBUG --- Checking validity of username\n");
+		printf("DEBUG --- Must be below 16 and above 1 character\n");
+#endif
+		if (sscanf(username_buffer, "%s", usernameString) == -1)
+		{
+			printf("Invalid empty line\n");
+			continue;
+		}
+		/* Checks for spaces in the line */
+		if ((usr_pointer = strpbrk(usr_pointer, " ")))
+		{
+			printf("No spaces allowed\n");
+			continue;
+		}
 		/*Check length of string */
 		if ((strlen(usernameString) >= 1) && (strlen(usernameString) <= MAX_USERNAME_LEN))
 		{
+#ifdef DEBUG
+			printf("DEBUG --- Username: %s was correct in regards to format\n", usernameString);
+#endif
 			valid = 1;
 		}
 	}
-	
+
 	/* Reinitalize valid for checking password */
 	valid = 0;
 	while (valid == 0)
 	{
 		printf("Enter password>\n");
-        /* Gets the input using fgets and then checks if an empty
+		/* Gets the input using fgets and then checks if an empty
         line is entered */
-        char *pwd_pointer = pwd_buffer;
-        fgets(pwd_buffer, 4096, stdin);
-        if (sscanf(pwd_buffer, "%s", string) == -1)
-        {
-            printf("Invalid empty line\n");
-            continue;
-        }
-        /* Checks for spaces in the line */
-        if ((pwd_pointer = strpbrk(pwd_pointer, " ")))
-        {
-            printf("No spaces allowed\n");
-            continue;
-        }
+		char *pwd_pointer = pwd_buffer;
+		fgets(pwd_buffer, 4096, stdin);
+		if (sscanf(pwd_buffer, "%s", string) == -1)
+		{
+			printf("Invalid empty line\n");
+			continue;
+		}
+		/* Checks for spaces in the line */
+		if ((pwd_pointer = strpbrk(pwd_pointer, " ")))
+		{
+			printf("No spaces allowed\n");
+			continue;
+		}
 		valid = valid_password(string);
 	}
 	FILE *file = NULL;
@@ -113,24 +120,22 @@ void register_user(void)
 	{
 		fprintf(file, "\n%s %s %i", usernameString, string, 0);
 	}
-	
+
 	fclose(file);
 	printf("Successfully registered user\n\n");
 }
 
 int removeNewLine(int checkOnce)
 {
-	char buffer[200]; 
-    if (checkOnce == 1)
+	char buffer[200];
+	if (checkOnce == 1)
 	{
-		getchar();         
-        buffer[strcspn(buffer, "\n")] = 0;
+		getchar();
+		buffer[strcspn(buffer, "\n")] = 0;
 		checkOnce++;
 	}
 	return checkOnce;
 }
-
-
 
 /*******************************************************************************
  * Author: Oliver Windall Juhl
@@ -144,7 +149,7 @@ int removeNewLine(int checkOnce)
  * outputs:
  * - int: 1 if user exists and matches the input else 0
 *******************************************************************************/
-int find_user(char username[], char pwd[], user_t** user)
+int find_user(char username[], char pwd[], user_t **user)
 {
 	/* Create a pointer storing the file */
 	FILE *file = NULL;
@@ -163,11 +168,14 @@ int find_user(char username[], char pwd[], user_t** user)
 	(*user) = malloc(sizeof(user_t));
 	(*user)->files = malloc(sizeof(file_t));
 
+#ifdef DEBUG
+	printf("DEBUG --- Scanning database for username and password\n");
+#endif
 	/* Loop through each line in the database */
 	while (fgets(line_in_file, 512, file))
-	{	
+	{
 		/* Create temporary linked list */
-		file_t* head = NULL;
+		file_t *head = NULL;
 		/* Temporary username, password and number of files in each line */
 		char temp_username[MAX_USERNAME_LEN + 1];
 		char temp_pwd[MAX_PWD_LEN + 1];
@@ -233,13 +241,24 @@ int find_user(char username[], char pwd[], user_t** user)
 			part_of_line = strtok(NULL, " ");
 			counter++;
 		} while ((part_of_line != NULL));
-		
+
+#ifdef DEBUG
+		if (strlen(temp_username) > 0 && strlen(temp_pwd) > 0)
+		{
+			printf("DEBUG --- Current checking username: %s and password: %s against user input\n",
+						 temp_username,
+						 temp_pwd);
+		}
+#endif
+
 		/* Check that the inputed username and password is equal to the details in the line */
 		if (strcmp(temp_username, username) == 0 && strcmp(temp_pwd, pwd) == 0)
 		{
-			printf("Found -> username: %s, password: %s and number of files is %d\n", temp_username, temp_pwd, num_of_files); /* DEBUG STATEMENT */ 
+#ifdef DEBUG
+			printf("DEBUG --- User found: %s %s\n", temp_username, temp_pwd); /* DEBUG STATEMENT */
+#endif
 			/* Copy the username and pwd to the user structure */
-			strcpy((*user)->username, temp_username); 
+			strcpy((*user)->username, temp_username);
 			strcpy((*user)->pwd, temp_pwd);
 			/* Copy line number and number of files to user structure */
 			(*user)->line = line;
@@ -256,60 +275,66 @@ int find_user(char username[], char pwd[], user_t** user)
 			head = NULL;
 			num_of_files = 0;
 			printf("User not found\n");
-			
 		}
 	}
 	return 0;
 }
 
-file_t* createFile(char filename[], int filesize, file_t* next)
+file_t *createFile(char filename[], int filesize, file_t *next)
 {
 	/* Allocate memory for new file */
-    file_t* new_file = (file_t*)malloc(sizeof(file_t));
+	file_t *new_file = (file_t *)malloc(sizeof(file_t));
 
 	/* Error checking */
-    if(new_file == NULL)
-    {
-        printf("Error creating a new file.\n");
+	if (new_file == NULL)
+	{
+		printf("Error creating a new file.\n");
 		return NULL;
-    }
-	
+	}
+
 	/* Add the file information to the newly created structure */
 	strcpy(new_file->filename, filename);
 	new_file->size = filesize;
 
 	/* Linked the file and the linked list */
-    new_file->next = next;
- 
-    return new_file;
+	new_file->next = next;
+
+	return new_file;
 }
 
-file_t* addHead(char filename[], int filesize, file_t* head)
+file_t *addHead(char filename[], int filesize, file_t *head)
 {
 	/* Create the head struct and set the address of the head to the new file */
-    file_t* new_file = createFile(filename, filesize, head);
-    head = new_file;
+	file_t *new_file = createFile(filename, filesize, head);
+	head = new_file;
 
-    return head;
+#ifdef DEBUG
+	printf("DEBUG --- Added new file to empty list of files with name %s\n", filename);
+#endif
+
+	return head;
 }
-file_t* addFile(char filename[], int filesize, file_t* head)
+file_t *addFile(char filename[], int filesize, file_t *head)
 {
 	/* Check if the head is NULL*/
-    if(head == NULL)
-        return NULL;
+	if (head == NULL)
+		return NULL;
 
 	/* Iterate to the last file */
-    file_t* current = head;
-    while(current->next != NULL)
-        current = current->next;
- 
-    /* Create a new file and append the end of the linked list to the new file */
-    file_t* new_file =  createFile(filename, filesize, NULL);
-    current->next = new_file;
- 
-    return head;
-}
+	file_t *current = head;
+	while (current->next != NULL)
+		current = current->next;
 
+	/* Create a new file and append the end of the linked list to the new file */
+	file_t *new_file = createFile(filename, filesize, NULL);
+	current->next = new_file;
+
+#ifdef DEBUG
+	printf("DEBUG --- Added new file to list of files with name %s\n", filename);
+#endif
+
+	return head;
+}
 
 /*******************************************************************************
  * Author: Oliver Windall Juhl
@@ -319,14 +344,14 @@ file_t* addFile(char filename[], int filesize, file_t* head)
  * - file_t *head: Pointer to the current first element of the list
  * outputs: none
 *******************************************************************************/
-void print_files(file_t* files)
+void print_files(file_t *files)
 {
-  file_t *current = files;
-  while (current != NULL)
-  {
-    printf("User has file %s with size %i\n", current->filename, current->size);
-    current = current->next;
-  }
+	file_t *current = files;
+	while (current != NULL)
+	{
+		printf("User has file %s with size %i\n", current->filename, current->size);
+		current = current->next;
+	}
 }
 
 /*******************************************************************************
@@ -341,31 +366,31 @@ void print_files(file_t* files)
  * - file_t: The new head of the linked list
 *******************************************************************************/
 
-void add_file(user_t** user, char filename[], int filesize)
+void add_file(user_t **user, char filename[], int filesize)
 {
-  file_t *new_file = (file_t*)malloc(sizeof(file_t));
- /* (*user)->files = malloc(sizeof(file_t)); */
-  strcpy(new_file->filename, filename);
-  new_file->size = filesize;
-  new_file->next = NULL;
+	file_t *new_file = (file_t *)malloc(sizeof(file_t));
+	/* (*user)->files = malloc(sizeof(file_t)); */
+	strcpy(new_file->filename, filename);
+	new_file->size = filesize;
+	new_file->next = NULL;
 
-  if ((*user)->files->next == NULL)
-  {
-	  (*user)->files->next = new_file;
-	  /* printf("Added at the beginning of linked list\n");   DEBUG STATEMENT */ 
-  }
-  else
-  {
-  	  file_t *current = (*user)->files;
+	if ((*user)->files->next == NULL)
+	{
+		(*user)->files->next = new_file;
+		/* printf("Added at the beginning of linked list\n");   DEBUG STATEMENT */
+	}
+	else
+	{
+		file_t *current = (*user)->files;
 
-	  while (!(current->next == NULL))
-	  {
-	  	  current = current->next;
-	  }
-	  current->next = new_file;
-	  /* printf("added Later\n");  DEBUG STATEMENT */ 
-  }
-  printf("Added file -> %s\n", filename); /* DEBUG STATEMENT */ 
+		while (!(current->next == NULL))
+		{
+			current = current->next;
+		}
+		current->next = new_file;
+		/* printf("added Later\n");  DEBUG STATEMENT */
+	}
+	printf("Added file -> %s\n", filename); /* DEBUG STATEMENT */
 }
 
 /*******************************************************************************
@@ -378,54 +403,67 @@ void add_file(user_t** user, char filename[], int filesize)
 *******************************************************************************/
 int valid_password(char password[])
 {
-  int valid = 0;
+	int valid = 0;
 
-  /* CHECKING THE SIZE OF PASSWORD */
-  if ((strlen(password) <= 6) || (strlen(password) >= 20))
-  {
-	printf("Password must be between 6 and 20 characters long\n");
-    return valid;
-  }
-  /* LOOP THROUGH THE PASSWORD */
-  int i;
-  int lower_case_count = 0;
-  int upper_case_count = 0;
-  int number_count = 0;
-  for (i = 0; i < strlen(password); i++)
-  {
+#ifdef DEBUG
+	printf("DEBUG --- Checking validity of password\n");
+	printf("DEBUG --- Must be beteween 6 and 20 characters\n");
+	printf("DEBUG --- Cant contain special characters\n");
+#endif
 
-    /* CHECKING FOR ANY SPECIAL CHARACTERS */
-    if (checkChar(password[i], 'a', 'z'))
-    {
-	  lower_case_count++;
-    }
-    else if (checkChar(password[i], 'A', 'Z'))
-    {
-	  upper_case_count++;
-    }
-	else if (checkChar(password[i], '0', '9'))
+	/* CHECKING THE SIZE OF PASSWORD */
+	if ((strlen(password) <= 6) || (strlen(password) >= 20))
 	{
-		number_count++;
+		printf("Password must be between 6 and 20 characters long\n");
+#ifdef DEBUG
+		printf("DEBUG --- Password: %s was concluded to not being valid\n", password);
+#endif
+		return valid;
+	}
+	/* LOOP THROUGH THE PASSWORD */
+	int i;
+	int lower_case_count = 0;
+	int upper_case_count = 0;
+	int number_count = 0;
+	for (i = 0; i < strlen(password); i++)
+	{
+
+		/* CHECKING FOR ANY SPECIAL CHARACTERS */
+		if (checkChar(password[i], 'a', 'z'))
+		{
+			lower_case_count++;
+		}
+		else if (checkChar(password[i], 'A', 'Z'))
+		{
+			upper_case_count++;
+		}
+		else if (checkChar(password[i], '0', '9'))
+		{
+			number_count++;
+		}
+		else
+		{
+#ifdef DEBUG
+			printf("DEBUG --- Character %c can't be used in password\n", password[i]);
+#endif
+			printf("Invalid character\n");
+			return valid;
+		}
+	}
+	if ((lower_case_count >= 1) && (upper_case_count >= 1) && (number_count >= 1))
+	{
+		valid = 1;
+#ifdef DEBUG
+		printf("DEBUG --- Password: %s was correct in regards to format\n", password);
+#endif
+		return valid;
 	}
 	else
 	{
-		printf("Invalid character\n");
-		return valid;
+		printf("Password MUST contain at least an uppercase, lowercase and an integer\n");
 	}
-  }
-  if ((lower_case_count >= 1) && (upper_case_count >= 1) && (number_count >= 1))
-  {
-		valid = 1;
-		return valid;
-  }
-  else
-  {
-	printf("Password MUST contain at least an uppercase, lowercase and an integer\n");
-  }
-  return valid;
+	return valid;
 }
-
-
 
 /*******************************************************************************
  * Author: Gabriel
@@ -435,10 +473,10 @@ int valid_password(char password[])
 *******************************************************************************/
 void print_auth_menu(void)
 {
-  printf("Select an option>\n");
-  printf("-----------> (1) Login User\n");
-  printf("-----------> (2) Register User\n");
-  printf("-----------> (3) Quit Program\n");
+	printf("Select an option>\n");
+	printf("-----------> (1) Login User\n");
+	printf("-----------> (2) Register User\n");
+	printf("-----------> (3) Quit Program\n");
 }
 
 /*******************************************************************************
@@ -448,32 +486,32 @@ void print_auth_menu(void)
  * inputs: none
  * outputs: none
 *******************************************************************************/
-void login(user_t** user)
+void login(user_t **user)
 {
-  int valid = 0;
-  char username[MAX_USERNAME_LEN + 1];
-  char pwd[MAX_PWD_LEN + 1];
+	int valid = 0;
+	char username[MAX_USERNAME_LEN + 1];
+	char pwd[MAX_PWD_LEN + 1];
 
-  printf("Enter login details or press B to go back\n");
-  do
-  {
-    print_login();
-    printf("Enter username: ");
-    scanf("%s", username);
-    if (strcmp(username, "b") == 0)
-    {
-      main();
-    }
-    printf("Enter password: ");
-    scanf("%s", pwd);
-    if (strcmp(pwd, "b") == 0)
-    {
-      main();
-    }
-    valid = find_user(username, pwd, user);
-  } while (valid == 0);
+	printf("Enter login details or press B to go back\n");
+	do
+	{
+		print_login();
+		printf("Enter username: ");
+		scanf("%s", username);
+		if (strcmp(username, "b") == 0)
+		{
+			main();
+		}
+		printf("Enter password: ");
+		scanf("%s", pwd);
+		if (strcmp(pwd, "b") == 0)
+		{
+			main();
+		}
+		valid = find_user(username, pwd, user);
+	} while (valid == 0);
 
-  printf("User succesfully logged in!\n");
+	printf("User succesfully logged in!\n");
 }
 
 /*******************************************************************************
@@ -484,19 +522,18 @@ void login(user_t** user)
 *******************************************************************************/
 void print_login(void)
 {
-  printf("Enter username and password followed by a space\n");
-  printf("Or enter 'b' to go back\n");
+	printf("Enter username and password followed by a space\n");
+	printf("Or enter 'b' to go back\n");
 }
 
 int checkChar(char letter, char minLetter, char maxLetter)
 {
-    if ((letter >= minLetter) && (letter <= maxLetter))
-    {
-        return 1;
-    }
-    else 
-    {
-        return 0;
-    }
-
+	if ((letter >= minLetter) && (letter <= maxLetter))
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
