@@ -14,13 +14,12 @@ int main(void)
 	user->files = NULL;
 	while(strlen(user->username) == 0 || strlen(user->pwd) == 0)
 	{
+		printf(" -------- Welcome to Digital Secure Wallet! --------\n");
 		print_auth_menu();
 		scanf("%d", &choice);
 		auth_choice(choice, &user);
 	}
 	/* User has logged in */
-	/*user->files = removeHead(user->files); */
-	print_files(user->files);
 	printf("\n"
 			"------ Welcome %s! ------ \n", user->username);
 	printf("\n");	

@@ -85,14 +85,13 @@ void encrypt_file(char filename[], user_t** usr)
 	{
 		(*usr)->files = NULL;
 		printf("First file \n");
-		(*usr)->files = prepend(encryp_name, fileSize, (*usr)->files);
+		(*usr)->files = addHead(encryp_name, fileSize, (*usr)->files);
 		(*usr)->num_files = (*usr)->num_files + 1;
-		
 	}
 	else
 	{
 		printf("Second file \n");
-		(*usr)->files = append(encryp_name, fileSize, (*usr)->files);
+		(*usr)->files = addFile(encryp_name, fileSize, (*usr)->files);
 		(*usr)->num_files++;
 	}
 	printf("%d\n", (*usr)->num_files);
@@ -247,3 +246,4 @@ char xor_encryption(char pwd)
   pwd = pwd ^ ENCRYPTION_KEY;
   return pwd;
 }
+

@@ -7,12 +7,13 @@ main function.
 #include <string.h> /* strcpy,strcmp,strlen */
 #include <stdlib.h> /* exit,malloc,free */
 
-#define MAX_USERNAME_LEN 16
+#define MAX_USERNAME_LEN 20
 #define MAX_FILENAME_LEN 20
-#define MAX_PWD_LEN 16
+#define MAX_PWD_LEN 20
 #define DB_NAME "database.txt"
 #define ENCRYPTION_KEY 0xFACA
-#define ENCRYPTION_KEY_LEN 6
+#define ENCRYPTION_KEY_LEN 6 
+
 
 struct file
 {
@@ -63,7 +64,10 @@ void options_main(user_t** usr);
 void print_options(void);
 void auth_option_choice(int choice, user_t** user);
 
-file_t* create(char filename[], int filesize, file_t* next);
-file_t* prepend(char filename[], int filesize, file_t* head);
-file_t* append(char filename[], int filesize, file_t* head);
+file_t* createFile(char filename[], int filesize, file_t* next);
+file_t* addHead(char filename[], int filesize, file_t* head);
+file_t* addFile(char filename[], int filesize, file_t* head);
 file_t* removeNode(file_t* head, int files, char filename[]);
+
+int removeNewLine(int checkOnce);
+int checkChar(char letter, char minLetter, char maxLetter);
