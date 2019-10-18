@@ -27,6 +27,12 @@ int main(int argc, char *argv[])
 		printf("Simply make a new user and start encrypting your files!\n");
 		return 0;
 	}
+	normal_mode();
+	return 0;
+}
+
+void normal_mode()
+{
 	int choice;
 	user_t *user;
 	user = malloc(sizeof(user_t));
@@ -36,7 +42,7 @@ int main(int argc, char *argv[])
 		printf(" -------- Welcome to Digital Secure Wallet! --------\n");
 		print_auth_menu();
 		scanf("%d", &choice);
-		auth_choice(choice, &user);
+		user_choice(choice, &user);
 	}
 	/* User has logged in */
 	printf("\n"
@@ -44,5 +50,4 @@ int main(int argc, char *argv[])
 				 user->username);
 	printf("\n");
 	options_main(&user);
-	return 0;
 }
