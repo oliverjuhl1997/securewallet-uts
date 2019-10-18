@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 	else if (argv[1] != NULL && strcmp(argv[1], "-h") == 0)
 	{
 		printf("------ Help ------ \n");
-		printf("This is SecureWallet.\n");
-		printf("Store your file encrypted in our database, \n");
+		printf("This is Digital Secure Wallet.\n");
+		printf("Store your file encrypted in your locally stored database, \n");
 		printf("to ensure security on your filesystem.\n");
 		printf("Simply make a new user and start encrypting your files!\n");
 		return 0;
