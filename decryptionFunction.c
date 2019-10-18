@@ -6,12 +6,40 @@
 
 void decrypt_file(user_t** usr)
 {
-	char filename_temp[MAX_FILENAME_LEN];
 	char temp_string[MAX_FILENAME_LEN + 3];
+	char buffer[1000];
+	char filename[1000];
+	int valid = 0;
+	int checkOnce = 1;
 
-	printf("Enter the name of the file you wish to decrypt>\n");
-	scanf("%s", filename_temp);
-	strcpy(temp_string, filename_temp);
+	while (valid == 0)
+	{
+		printf("Enter the name of the original file you wish to decrypt>\n");
+		checkOnce = removeNewLine(checkOnce);
+
+		/* Gets the input using fgets and then checks if an empty
+        line is entered */
+		char *pointer = buffer;
+		fgets(buffer, 4096, stdin);
+
+		if (sscanf(buffer, "%s", filename) == -1)
+		{
+			printf("Invalid empty line\n");
+			continue;
+		}
+		/* Checks for spaces in the line */
+		if ((pointer = strpbrk(pointer, " ")))
+		{
+			printf("No spaces allowed\n");
+			continue;
+		}
+		/*Check length of string */
+		if ((strlen(filename) >= 1) && (strlen(filename) <= MAX_FILENAME_LEN))
+		{
+			valid = 1;
+		}
+	}
+	strcpy(temp_string, filename);
 	strcat(temp_string, "(en).txt");
 
 	int true = 0;
@@ -20,7 +48,6 @@ void decrypt_file(user_t** usr)
 	{
 		if (strcmp(temp_string, current->filename) == 0)
 		{
-			printf("The file exists\n");
 			true = 1;
 			break;
 		}
@@ -28,7 +55,7 @@ void decrypt_file(user_t** usr)
 	}
 	if (true == 1)
 	{
-		decryption(temp_string, filename_temp, usr);
+		decryption(temp_string, filename, usr);
 	}
 	else
 	{
@@ -45,24 +72,29 @@ void decryption(char filename[], char newfile[], user_t** usr)
  	pFILE = fopen(filename, "r");
 
 	if (pFILE == NULL) {
+	    printf("Unable to open file\n");
 		return;
-        printf("Unable to open file\n");
     }
 
 	FILE *newFile = NULL;
     newFile = fopen(newfile, "w");
 
 	char currentChar;
+
+#ifdef DEBUG
+	printf("DEBUG ---- Applying XOR Decryption\n");
+	printf("\n");
+#endif
+
 	while ((currentChar = getc(pFILE)) != EOF) 
   	{	
- 		putc(xor_encryption(currentChar), newFile);
+		putc(xor_dencryption(currentChar), newFile);
   	}
 	printf("%s successfully Decrypted File! New name of file is %s\n", filename, newfile);
-	printf("%s\n", filename);
+	remove(filename);
+	printf("Deleted %s....\n", filename);
 	
-	printf("The number of files is %d\n", (*usr)->num_files);
 	head = removeNode(head, (*usr)->num_files, filename);
-	print_files(head);
 	(*usr)->files = head;
 	(*usr)->num_files = (*usr)->num_files - 1;
 	
@@ -85,7 +117,9 @@ file_t* removeNode(file_t* head, int files, char filename[])
 		/* The head of the linked list */
 		if (strcmp(head->filename, filename) == 0)
 		{
-			printf("File found\n");
+#ifdef DEBUG
+			printf("DEBUG ---- Head to be removed\n");
+#endif
 			file_t* temp = head;
 			head = head -> next;
 			free(temp);
@@ -99,6 +133,9 @@ file_t* removeNode(file_t* head, int files, char filename[])
 			{
 				if (strcmp(filename, current->filename) == 0)
 				{
+#ifdef DEBUG
+					printf("DEBUG ---- Removing file from linked list\n");
+#endif
 					file_t* temp = current;
 					previous->next = current->next;
 					free(temp);

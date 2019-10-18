@@ -59,8 +59,8 @@ void register_user(void)
 		char *usr_pointer = username_buffer;
 		fgets(username_buffer, 4096, stdin);
 #ifdef DEBUG
-		printf("DEBUG --- Checking validity of username\n");
-		printf("DEBUG --- Must be below 16 and above 1 character\n");
+		printf("DEBUG ----- Checking validity of username\n");
+		printf("DEBUG ----- Must be below 16 and above 1 character\n");
 #endif
 		if (sscanf(username_buffer, "%s", usernameString) == -1)
 		{
@@ -92,6 +92,7 @@ void register_user(void)
         line is entered */
 		char *pwd_pointer = pwd_buffer;
 		fgets(pwd_buffer, 4096, stdin);
+
 		if (sscanf(pwd_buffer, "%s", string) == -1)
 		{
 			printf("Invalid empty line\n");
@@ -169,7 +170,7 @@ int find_user(char username[], char pwd[], user_t **user)
 	(*user)->files = malloc(sizeof(file_t));
 
 #ifdef DEBUG
-	printf("DEBUG --- Scanning database for username and password\n");
+	printf("DEBUG ----- Scanning database for username and password\n");
 #endif
 	/* Loop through each line in the database */
 	while (fgets(line_in_file, 512, file))
@@ -274,9 +275,14 @@ int find_user(char username[], char pwd[], user_t **user)
 			/* Reset temporary linked list before checking a new line */
 			head = NULL;
 			num_of_files = 0;
-			printf("User not found\n");
+#ifdef DEBUG
+			printf("DEBUG ----- User not found in database\n");
+			printf("\n");
+#endif
 		}
 	}
+	printf("User not found\n");
+	printf("\n");
 	return 0;
 }
 
@@ -296,9 +302,11 @@ file_t *createFile(char filename[], int filesize, file_t *next)
 	strcpy(new_file->filename, filename);
 	new_file->size = filesize;
 
+
 	/* Linked the file and the linked list */
 	new_file->next = next;
 
+	/* Return the new file */
 	return new_file;
 }
 
@@ -349,7 +357,7 @@ void print_files(file_t *files)
 	file_t *current = files;
 	while (current != NULL)
 	{
-		printf("User has file %s with size %i\n", current->filename, current->size);
+		printf("DEBUG ------ User has file %s with size %i B \n ", current->filename, current->size);
 		current = current->next;
 	}
 }
@@ -415,9 +423,9 @@ int valid_password(char password[])
 	if ((strlen(password) <= 6) || (strlen(password) >= 20))
 	{
 		printf("Password must be between 6 and 20 characters long\n");
-#ifdef DEBUG
+		#ifdef DEBUG
 		printf("DEBUG --- Password: %s was concluded to not being valid\n", password);
-#endif
+		#endif
 		return valid;
 	}
 	/* LOOP THROUGH THE PASSWORD */
@@ -492,7 +500,6 @@ void login(user_t **user)
 	char username[MAX_USERNAME_LEN + 1];
 	char pwd[MAX_PWD_LEN + 1];
 
-	printf("Enter login details or press B to go back\n");
 	do
 	{
 		print_login();
@@ -500,14 +507,15 @@ void login(user_t **user)
 		scanf("%s", username);
 		if (strcmp(username, "b") == 0)
 		{
-			main();
+			return;
 		}
 		printf("Enter password: ");
 		scanf("%s", pwd);
 		if (strcmp(pwd, "b") == 0)
 		{
-			main();
+			return;
 		}
+		decrypt(database);
 		valid = find_user(username, pwd, user);
 	} while (valid == 0);
 
@@ -522,8 +530,8 @@ void login(user_t **user)
 *******************************************************************************/
 void print_login(void)
 {
-	printf("Enter username and password followed by a space\n");
-	printf("Or enter 'b' to go back\n");
+	printf(" -------- Login -------- \n");
+	printf("Enter 'b' to go back\n");
 }
 
 int checkChar(char letter, char minLetter, char maxLetter)

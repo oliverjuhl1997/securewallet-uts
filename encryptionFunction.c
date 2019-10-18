@@ -20,7 +20,10 @@ void options_main(user_t** usr)
 		print_options();
 		scanf("%d", &choice);
 		auth_option_choice(choice, &user);
-
+#ifdef DEBUG
+		print_files(user->files);
+		printf("The number of files is %d\n", user->num_files);
+#endif
 	} while (choice != 4);
 	printf("You have chosen to log out\n");
 }
@@ -36,10 +39,47 @@ void options_main(user_t** usr)
 void enter_file(user_t** usr)
 {
 	int counter = 0;
-	char filename_temp[MAX_FILENAME_LEN];
-	printf("Enter the name of the file you wish to encrypt>\n");
-	scanf("%s", filename_temp);
-	encrypt_file(filename_temp, usr);
+	char buffer[1000];
+	char filename[1000];
+	int valid = 0;
+	int checkOnce = 1;
+
+	while (valid == 0)
+	{
+		printf("Enter the name of the file you wish to encrypt>\n");
+		checkOnce = removeNewLine(checkOnce);
+
+		/* Gets the input using fgets and then checks if an empty
+        line is entered */
+		char *pointer = buffer;
+		fgets(buffer, 4096, stdin);
+
+		if (sscanf(buffer, "%s", filename) == -1)
+		{
+			printf("Invalid empty line\n");
+			continue;
+		}
+		/* Checks for spaces in the line */
+		if ((pointer = strpbrk(pointer, " ")))
+		{
+			printf("No spaces allowed\n");
+			continue;
+		}
+#ifdef DEBUG
+		printf("\n");
+		printf("DEBUG ---- Checking that the filename is less than 20 chars\n");
+#endif
+		/*Check length of string */
+		if ((strlen(filename) >= 1) && (strlen(filename) <= MAX_FILENAME_LEN))
+		{
+			valid = 1;
+		}
+	}
+#ifdef DEBUG
+	printf("DEBUG ----- Username passed validation test\n");
+	printf("\n");
+#endif
+	encrypt_file(filename, usr);
 	counter++;
 	return;
 }
@@ -65,11 +105,10 @@ void encrypt_file(char filename[], user_t** usr)
  	pFILE = fopen(filename, "r");
 
 	if (pFILE == NULL) {
+		printf("Unable to open file\n");
 		return;
-        printf("Unable to open file\n");
     }
-/*	user_t* temp_user = *usr; THIS IS WHAT CAUSED THE ERROR
-	temp_user->files = malloc(sizeof(file_t)); */
+
 	int fileSize;
 
 	fileSize = calculcateSize(filename);
@@ -81,22 +120,30 @@ void encrypt_file(char filename[], user_t** usr)
  		putc(xor_encryption(currentChar), newFile);
   	}
 	printf("%s successfully encrypted! New name of file is %s\n", filename, encryp_name);
+	remove(filename);
+	printf("Deleted %s\n", filename);
+#ifdef DEBUG
+	printf("\n");
+#endif
+
 	if ((*usr)->num_files <= 0)
 	{
 		(*usr)->files = NULL;
-		printf("First file \n");
+
+#ifdef DEBUG
+		printf("DEBUG ----- First file to be encrypted\n");
+#endif
+
 		(*usr)->files = addHead(encryp_name, fileSize, (*usr)->files);
 		(*usr)->num_files = (*usr)->num_files + 1;
 	}
 	else
 	{
-		printf("Second file \n");
 		(*usr)->files = addFile(encryp_name, fileSize, (*usr)->files);
 		(*usr)->num_files++;
 	}
 	printf("%d\n", (*usr)->num_files);
-	printf("Files being printed...\n");
-	print_files((*usr)->files);
+
 
   	fclose(pFILE);
   	fclose(newFile);
@@ -156,7 +203,9 @@ void saveUser(user_t** usr)
     fclose(file2);
     remove(DB_NAME);
     rename(temp, DB_NAME); 
-    printf(" Replacement did successfully..!! \n");
+#ifdef DEBUG
+	printf("\n");
+#endif
 }
 
 
@@ -205,8 +254,6 @@ void print_options(void)
 *******************************************************************************/
 void auth_option_choice(int choice, user_t** user)
 {
-	print_files((*user)->files);
-	printf("The number of files is %d\n", (*user)->num_files);
 	switch (choice)
 	{
 	case 1:
@@ -243,7 +290,23 @@ void auth_option_choice(int choice, user_t** user)
 *******************************************************************************/
 char xor_encryption(char pwd)
 {
+  /* Double Caesar Cipher */
+  pwd = pwd + CAESAR_KEY;
+  pwd = pwd + CAESAR_KEY2;
+
+  /* XOR */
   pwd = pwd ^ ENCRYPTION_KEY;
   return pwd;
 }
 
+char xor_dencryption(char pwd)
+{
+  /* XOR */
+  pwd = pwd ^ ENCRYPTION_KEY;
+
+  /* Double Caesar Cipher */
+  pwd = pwd - CAESAR_KEY2;
+  pwd = pwd - CAESAR_KEY;
+
+  return pwd;
+}

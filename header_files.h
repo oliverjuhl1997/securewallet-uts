@@ -6,12 +6,17 @@ main function.
 #include <stdio.h>  /* scanf,printf,getchar,fgets,fclose,fwrite,fread,fopen */
 #include <string.h> /* strcpy,strcmp,strlen */
 #include <stdlib.h> /* exit,malloc,free */
+#ifndef _HEADERFILES_
+#define _HEADERFILES_
+
 
 #define MAX_USERNAME_LEN 20
 #define MAX_FILENAME_LEN 20
 #define MAX_PWD_LEN 20
 #define DB_NAME "database.txt"
 #define ENCRYPTION_KEY 0xFACA
+#define CAESAR_KEY 0xBDCA
+#define CAESAR_KEY2 0xACEF
 #define ENCRYPTION_KEY_LEN 6 
 
 
@@ -36,7 +41,7 @@ struct user
 typedef struct user user_t;
 
 
-int main(void);
+int main(int argc, char *argv[]);
 /* Print related functions */
 void print_auth_menu(void);
 void print_login(void);
@@ -56,6 +61,7 @@ int calculcateSize(char filename[]);
 /* Decryption related functions */
 void decrypt_file(user_t** usr);
 void decryption(char filename[], char newFile[], user_t** usr);
+char xor_dencryption(char pwd);
 /* Loading a user related functions*/
 void add_file(user_t** user, char filename[], int file_size);
 void print_files(file_t* user);
@@ -72,21 +78,12 @@ file_t* removeNode(file_t* head, int files, char filename[]);
 int removeNewLine(int checkOnce);
 int checkChar(char letter, char minLetter, char maxLetter);
 
-/* Searching and sorting functions */
+/*Searching and sorting functions */
 void dispFile_Menu(file_t* files);
 void dispFile_Options(file_t* files);
-
 void searchFiles(file_t* files);
-void sorting_Options(file_t* files);
-
-void sort_alph(file_t* files);
-void sort_alph_rev(file_t* files);
-void sort_size_asc(file_t* files);
-void sort_size_desc(file_t* files);
-void swap_files(file_t *ptr_a, file_t *ptr_b);
-void swap(file_t *a, file_t *b);
-
 void print_dispFile_options(void);
 void print_sorting_options(void);
+void print_result(file_t *current); 
 
-void print_result(file_t *current);
+#endif
